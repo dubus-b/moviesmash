@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MovieSmash Admin Beta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+        .container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui container">
+        <h1 class="ui header">MovieSmash Admin Beta</h1>
+        <div class="ui segment">
+            <form class="ui form" id="filmSummaryForm">
+                <div class="field">
+                    <label for="film1">Nom du premier film :</label>
+                    <input type="text" id="film1" name="film1" required>
+                </div>
+    
+                <div class="field">
+                    <label for="film2">Nom du deuxième film :</label>
+                    <input type="text" id="film2" name="film2" required>
+                </div>
+    
+                <button class="ui primary button" type="button" onclick="generateSummary()">Générer le Résumé</button>
+            </form>
+        </div>
+
+        <div id="summaryResult" class="ui segment" style="display: none;">
+            <h2 class="ui header">Résumé Combiné :</h2>
+            <p id="summaryText"></p>
+        </div>
+
+        <div class="ui segment">
+            <img src="image.jpg" alt="Image d'illustration" class="ui centered medium image">
+        </div>
+    </div>
+
+    <script>
+        function generateSummary() {
+            // Récupérer le bouton
+            const generateButton = document.querySelector(".ui.primary.button");
+            
+            // Désactiver le bouton
+            generateButton.disabled = true;
+            
+            // Modifier le texte du bouton en "Chargement en cours..."
+            generateButton.textContent = "Chargement en cours...";
+
+            // Récupérer les valeurs des champs film1 et film2
+            const film1 = document.getElementById("film1").value;
+            const film2 = document.getElementById("film2").value;
+
+            // Créer un objet JSON avec les données
+            const requestData = {
+                film1: film1,
+                film2: film2
+            };
+
+            // Effectuer une requête POST vers la route Django
+            fetch('/api/film/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Activer à nouveau le bouton
+                generateButton.disabled = false;
+                
+                // Restaurer le texte du bouton
+                generateButton.textContent = "Générer le Résumé";
+                
+                // Afficher le résumé généré
+                document.getElementById("summaryText").innerText = data.resumé;
+                document.getElementById("summaryResult").style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Erreur lors de la requête :', error);
+                // En cas d'erreur, activer à nouveau le bouton
+                generateButton.disabled = false;
+                // Restaurer le texte du bouton
+                generateButton.textContent = "Générer le Résumé";
+                // Afficher un message d'erreur
+                document.getElementById("summaryText").innerText = "Erreur lors du chargement du résumé.";
+            });
+        }
+    </script>
+</body>
+</html>
